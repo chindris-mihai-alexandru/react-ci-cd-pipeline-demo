@@ -1,15 +1,40 @@
-name: CI
+name: CI/CD Pipeline
 
-on: push
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  test:
+  test-backend:
     runs-on: ubuntu-latest
     steps:
-      # checks out the current git commit so we can use it.
-      # read more at https://github.com/orgs/community/discussions/25682
+      # Checks out the current git commit
       - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Install dependencies
         run: npm install
-      - name: Test the code
-        run: npm test
+      - name: Test backend code
+        run: node test-runner.js
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out the current git commit
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: my-app/package-lock.json
+      - name: Install frontend dependencies
+        run: cd my-app && npm install
+      - name: Run frontend tests
+        run: cd my-app && npm test
+      - name: Build frontend
+        run: cd my-app && npm run build
